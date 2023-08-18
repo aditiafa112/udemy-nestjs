@@ -4,6 +4,8 @@ import {
   Delete,
   Get,
   HttpCode,
+  Logger,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -16,10 +18,11 @@ import { Event } from './event.entity';
 import { UpdateEventDto } from './update-event.dto';
 import { Like, MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { group } from 'console';
 
 @Controller('/events')
 export class EventsController {
+  private readonly logger = new Logger(EventsController.name);
+
   constructor(
     @InjectRepository(Event)
     private readonly repository: Repository<Event>,
@@ -27,7 +30,10 @@ export class EventsController {
 
   @Get()
   async findAll() {
-    return await this.repository.find();
+    console.log(`Hit the findAll route`);
+    const event = await this.repository.find();
+    this.logger.debug(`Found ${event.length} events`);
+    return event;
   }
 
   @Get('/practice')
@@ -52,7 +58,13 @@ export class EventsController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.repository.findOne({ where: { id } });
+    const event = await this.repository.findOne({ where: { id } });
+
+    if (!event) {
+      throw new NotFoundException();
+    }
+
+    return event;
   }
 
   @Post()
@@ -68,6 +80,10 @@ export class EventsController {
   async update(@Param('id') id, @Body() input: UpdateEventDto) {
     const event = await this.repository.findOne(id);
 
+    if (!event) {
+      throw new NotFoundException();
+    }
+
     return await this.repository.save({
       ...event,
       ...input,
@@ -79,6 +95,11 @@ export class EventsController {
   @HttpCode(204)
   async remove(@Param('id') id) {
     const event = await this.repository.findOne(id);
+
+    if (!event) {
+      throw new NotFoundException();
+    }
+
     await this.repository.remove(event);
   }
 }
