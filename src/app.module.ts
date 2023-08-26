@@ -5,9 +5,10 @@ import { AppController } from './app.controller';
 import { AppDummy } from './app.dummy';
 import { AppJapanService } from './app.japan.service';
 import { AppService } from './app.service';
-import { EventModule } from './event/event.module';
+import { EventsModule } from './events/events.module';
 import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
+import { SchoolModule } from './school/school.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import ormConfigProd from './config/orm.config.prod';
       useFactory:
         process.env.NODE_ENV !== 'production' ? ormConfig : ormConfigProd,
     }),
-    EventModule,
+    EventsModule,
+    SchoolModule,
   ],
   controllers: [AppController],
   providers: [

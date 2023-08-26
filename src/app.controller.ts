@@ -11,7 +11,7 @@ export class AppController {
   }
 
   @Get('/bye')
-  getBye(): string {
-    return 'bye-bye';
+  getBye() {
+    return 'Bye!';
   }
 }
