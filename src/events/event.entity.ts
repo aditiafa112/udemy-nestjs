@@ -9,9 +9,14 @@ import {
 import { Attendee } from './attendee.entity';
 import { User } from '../auth/user.entity';
 import { Expose } from 'class-transformer';
+import { PaginationResult } from '../pagination/paginator';
 
 @Entity()
 export class Event {
+  constructor(partial?: Partial<Event>) {
+    Object.assign(this, partial);
+  }
+
   @PrimaryGeneratedColumn()
   @Expose()
   id: number;
@@ -61,3 +66,5 @@ export class Event {
   @Expose()
   attendeeAccepted?: number;
 }
+
+export type PaginatedEvents = PaginationResult<Event>;

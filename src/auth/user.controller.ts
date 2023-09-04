@@ -17,7 +17,7 @@ export class UserController {
   async create(@Body() createUserDto: CreateUserDto) {
     const user = new User();
 
-    if (createUserDto.password !== createUserDto.retypePassword) {
+    if (createUserDto.password !== createUserDto.retypedPassword) {
       throw new BadRequestException([
         'Password and Retype Password must be the same',
       ]);

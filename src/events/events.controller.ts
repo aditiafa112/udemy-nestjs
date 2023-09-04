@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
+  Logger,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -31,6 +32,8 @@ import { AuthGuardJwt } from '../auth/auth-guard.jwt';
   strategy: 'excludeAll',
 })
 export class EventsController {
+  private readonly logger = new Logger(EventsController.name);
+
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
@@ -110,7 +113,7 @@ export class EventsController {
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const event = await this.eventsService.getEvent(id);
+    const event = await this.eventsService.getEventWithAttendeeCount(id);
 
     if (!event) {
       throw new NotFoundException();
@@ -123,7 +126,9 @@ export class EventsController {
   @UseGuards(AuthGuardJwt)
   @UseInterceptors(ClassSerializerInterceptor)
   async create(@Body() input: CreateEventDto, @CurrentUser() user: User) {
-    return await this.eventsService.createEvent(input, user);
+    const event = await this.eventsService.createEvent(input, user);
+    this.logger.log(event);
+    return event;
   }
 
   // @UsePipes(new ValidationPipe({ groups: ['update'] }))
@@ -135,7 +140,7 @@ export class EventsController {
     @Body() input: UpdateEventDto,
     @CurrentUser() user: User,
   ) {
-    const event = await this.eventsService.getEvent(id);
+    const event = await this.eventsService.findOne(id);
 
     if (!event) {
       throw new NotFoundException();
@@ -158,8 +163,8 @@ export class EventsController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: User,
   ) {
-    const event = await this.eventsService.getEvent(id);
-
+    const event = await this.eventsService.findOne(id);
+    this.logger.log(event);
     if (!event) {
       throw new NotFoundException();
     }
